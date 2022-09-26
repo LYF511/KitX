@@ -53,6 +53,14 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
             {
                 MicaOpacityConfirmButtonVisibility = Program.Config.App.DeveloperSetting;
             };
+            EventHandlers.LanguageChanged += () =>
+            {
+                foreach (var item in SurpportThemes)
+                    item.ThemeDisplayName = GetThemeInLanguages(item.ThemeName);
+                _currentAppTheme = SurpportThemes.Find(
+                    x => x.ThemeName.Equals(Program.Config.App.Theme));
+                PropertyChanged?.Invoke(this, new(nameof(CurrentAppTheme)));
+            };
         }
 
         /// <summary>
@@ -68,28 +76,14 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
                     LanguageName = item.Value
                 });
             }
-            LanguageSelected = SurpportLanguages.FindIndex(0, SurpportLanguages.Count,
-                new LanguageMatch(Program.Config.App.AppLanguage).IsIt);
+            LanguageSelected = SurpportLanguages.FindIndex(
+                x => x.LanguageCode.Equals(Program.Config.App.AppLanguage));
         }
 
         /// <summary>
         /// 保存变更
         /// </summary>
         private static void SaveChanges() => EventHandlers.Invoke("ConfigSettingsChanged");
-
-        /// <summary>
-        /// 可选的应用主题属性
-        /// </summary>
-        internal string[] AppThemes { get; } = new[]
-        {
-            FluentAvaloniaTheme.LightModeString,
-            FluentAvaloniaTheme.DarkModeString,
-            FluentAvaloniaTheme.HighContrastModeString
-        };
-
-        private string _currentAppTheme = Program.Config.App.Theme == "Follow"
-            ? AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>().RequestedTheme
-            : Program.Config.App.Theme;
 
         private Color2 nowColor = new();
 
@@ -103,19 +97,61 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
         }
 
         /// <summary>
+        /// 获取主题不同语言的表示方式
+        /// </summary>
+        /// <param name="key">语言键</param>
+        /// <returns>表示方式</returns>
+        private static string GetThemeInLanguages(string key)
+        {
+            if (Application.Current.TryFindResource($"Text_Settings_Tab_Personalise_Theme_{key}",
+                out object? result))
+                if (result != null) return (string)result;
+                else return string.Empty;
+            else return string.Empty;
+        }
+
+        /// <summary>
+        /// 可选的应用主题属性
+        /// </summary>
+        internal static List<SurpportTheme> SurpportThemes { get; } = new()
+        {
+            new()
+            {
+                ThemeName = FluentAvaloniaTheme.LightModeString,
+                ThemeDisplayName = GetThemeInLanguages(FluentAvaloniaTheme.LightModeString),
+            },
+            new()
+            {
+                ThemeName = FluentAvaloniaTheme.DarkModeString,
+                ThemeDisplayName = GetThemeInLanguages(FluentAvaloniaTheme.DarkModeString),
+            },
+            new()
+            {
+                ThemeName = FluentAvaloniaTheme.HighContrastModeString,
+                ThemeDisplayName = GetThemeInLanguages(FluentAvaloniaTheme.HighContrastModeString),
+            },
+            new()
+            {
+                ThemeName = "Follow",
+                ThemeDisplayName = GetThemeInLanguages("Follow"),
+            }
+        };
+
+        private SurpportTheme? _currentAppTheme = SurpportThemes.Find(
+            x => x.ThemeName.Equals(Program.Config.App.Theme));
+
+        /// <summary>
         /// 当前应用主题属性
         /// </summary>
-        internal string CurrentAppTheme
+        internal SurpportTheme? CurrentAppTheme
         {
             get => _currentAppTheme;
             set
             {
-                Program.Config.App.Theme = value;
-                if (RaiseAndSetIfChanged(ref _currentAppTheme, value))
-                {
-                    var faTheme = AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>();
-                    faTheme.RequestedTheme = value;
-                }
+                _currentAppTheme = value;
+                Program.Config.App.Theme = value.ThemeName;
+                var faTheme = AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>();
+                faTheme.RequestedTheme = value.ThemeName == "Follow" ? null : value.ThemeName;
                 SaveChanges();
             }
         }
@@ -147,18 +183,6 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
             EventHandlers.Invoke("LanguageChanged");
         }
 
-        /// <summary>
-        /// 语言匹配项
-        /// </summary>
-        internal class LanguageMatch
-        {
-            private readonly string languageCode;
-
-            public LanguageMatch(string LanguageCode) => languageCode = LanguageCode;
-
-            public bool IsIt(SurpportLanguages sl) => sl.LanguageCode.Equals(languageCode);
-        }
-
         internal int languageSelected = -1;
 
         /// <summary>
@@ -180,6 +204,19 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
                 {
                     LanguageSelected = 0;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Mica 效果设置项相关区域是否展开
+        /// </summary>
+        internal static bool MicaAreaExpanded
+        {
+            get => Program.Config.Pages.SettingsPage.MicaAreaExpanded;
+            set
+            {
+                Program.Config.Pages.SettingsPage.MicaAreaExpanded = value;
+                SaveChanges();
             }
         }
 
@@ -233,6 +270,19 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
         }
 
         /// <summary>
+        /// 主题色调色盘设置项相关区域是否展开
+        /// </summary>
+        internal static bool PaletteAreaExpanded
+        {
+            get => Program.Config.Pages.SettingsPage.PaletteAreaExpanded;
+            set
+            {
+                Program.Config.Pages.SettingsPage.PaletteAreaExpanded = value;
+                SaveChanges();
+            }
+        }
+
+        /// <summary>
         /// 确认主题色变更命令
         /// </summary>
         internal DelegateCommand? ColorConfirmedCommand { get; set; }
@@ -280,3 +330,35 @@ namespace KitX_Dashboard.ViewModels.Pages.Controls
 #pragma warning restore CA2011 // 避免无限递归
 #pragma warning restore CS8604 // 引用类型参数可能为 null。
 #pragma warning restore CS8602 // 解引用可能出现空引用。
+
+//                         __________________________
+//                 __..--/".'                        '.
+//         __..--""      | |                          |
+//        /              | |                          |
+//       /               | |    ___________________   |
+//      ;                | |   :__________________/:  |
+//      |                | |   |                 '.|  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |                  ||  |
+//      |                | |   |______......-----"\|  |
+//      |                | |   |_______......-----"   |
+//      |                | |                          |
+//      |                | |                          |
+//      |                | |                  ____----|
+//      |                | |_____.....----|#######|---|
+//      |                | |______.....----""""       |
+//      |                | |                          |
+//      |. ..            | |   ,                      |
+//      |... ....        | |  (c ----- """           .'
+//      |..... ......  |\|_|    ____......------"""|"
+//      |. .... .......| |""""""                   |
+//      '... ..... ....| |                         |
+//        "-._ .....  .| |                         |
+//            "-._.....| |             ___...---"""'
+//                "-._.| | ___...---"""
+//                    """""
