@@ -1,5 +1,5 @@
 ﻿using KitX_Dashboard.Data;
-using KitX_Dashboard.Models;
+using KitX_Dashboard.Services;
 using Serilog;
 using System;
 using System.IO;
@@ -43,7 +43,7 @@ namespace KitX_Dashboard
                     fileSizeLimitBytes: Program.Config.Log.LogFileSingleMaxSize,
                     buffered: true,
                     flushToDiskInterval: new(0, 0, Program.Config.Log.LogFileFlushInterval),
-                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information,
+                    restrictedToMinimumLevel: Program.Config.Log.LogLevel,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: Program.Config.Log.LogFileMaxCount
                 )

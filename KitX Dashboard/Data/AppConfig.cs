@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Serilog.Events;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace KitX_Dashboard.Data
@@ -147,13 +148,13 @@ namespace KitX_Dashboard.Data
         public class Config_Pages
         {
             [JsonInclude]
-            public Config_HomePage HomePage { get; set; } = new();
+            public Config_HomePage Home { get; set; } = new();
 
             [JsonInclude]
-            public Config_MarketPage MarketPage { get; set; } = new();
+            public Config_MarketPage Market { get; set; } = new();
 
             [JsonInclude]
-            public Config_SettingsPage SettingsPage { get; set; } = new();
+            public Config_SettingsPage Settings { get; set; } = new();
 
             /// <summary>
             /// HomePageConfig
@@ -191,6 +192,21 @@ namespace KitX_Dashboard.Data
 
                 [JsonInclude]
                 public bool PaletteAreaExpanded { get; set; } = false;
+
+                [JsonInclude]
+                public bool LogReletiveAreaExpanded { get; set; } = true;
+
+                [JsonInclude]
+                public bool AboutAreaExpanded { get; set; } = false;
+
+                [JsonInclude]
+                public bool AuthorsAreaExpanded { get; set; } = false;
+
+                [JsonInclude]
+                public bool LinksAreaExpanded { get; set; } = false;
+
+                [JsonInclude]
+                public bool ThirdPartyLicensesAreaExpanded { get; set; } = false;
 
                 [JsonInclude]
                 public bool IsNavigationViewPaneOpened { get; set; } = true;
@@ -235,7 +251,7 @@ namespace KitX_Dashboard.Data
         {
 
             [JsonInclude]
-            public long LogFileSingleMaxSize { get; set; } = 1024 * 10000;      //  10MB
+            public long LogFileSingleMaxSize { get; set; } = 1024 * 1024 * 10;      //  10MB
 
             [JsonInclude]
             public string LogFilePath { get; set; } = "./Log/";
@@ -249,6 +265,9 @@ namespace KitX_Dashboard.Data
 
             [JsonInclude]
             public int LogFileFlushInterval { get; set; } = 30;
+
+            [JsonInclude]
+            public LogEventLevel LogLevel { get; set; } = LogEventLevel.Information;
         }
     }
 }

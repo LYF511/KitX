@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
+using KitX_Dashboard.Services;
 using KitX_Dashboard.ViewModels.Pages;
 using KitX_Dashboard.Views.Pages.Controls;
 using Serilog;
@@ -39,6 +40,11 @@ namespace KitX_Dashboard.Views.Pages
         }
 
         /// <summary>
+        /// 保存对配置文件的修改
+        /// </summary>
+        private static void SaveChanges() => EventHandlers.Invoke("ConfigSettingsChanged");
+
+        /// <summary>
         /// 前台页面切换事件
         /// </summary>
         /// <param name="sender">被点击的 NavigationViewItem</param>
@@ -61,8 +67,12 @@ namespace KitX_Dashboard.Views.Pages
 
         private static string SelectedViewName
         {
-            get => Program.Config.Pages.SettingsPage.SelectedViewName;
-            set => Program.Config.Pages.SettingsPage.SelectedViewName = value;
+            get => Program.Config.Pages.Settings.SelectedViewName;
+            set
+            {
+                Program.Config.Pages.Settings.SelectedViewName = value;
+                SaveChanges();
+            }
         }
 
         private static Type SelectedViewType() => SelectedViewName switch
@@ -70,6 +80,7 @@ namespace KitX_Dashboard.Views.Pages
             "View_General" => typeof(Settings_General),
             "View_Personalise" => typeof(Settings_Personalise),
             "View_Performence" => typeof(Settings_Performence),
+            "View_Update" => typeof(Settings_Update),
             "View_About" => typeof(Settings_About),
             _ => typeof(Settings_General),
         };

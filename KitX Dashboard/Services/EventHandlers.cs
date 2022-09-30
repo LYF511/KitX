@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
 
-namespace KitX_Dashboard.Models
+
+namespace KitX_Dashboard.Services
 {
     internal static class EventHandlers
     {
@@ -17,6 +18,8 @@ namespace KitX_Dashboard.Models
 
         internal delegate void DevelopSettingsChangedHandler();
 
+        internal delegate void LogConfigUpdatedHandler();
+
         internal static event LanguageChangedHandler? LanguageChanged;
 
         internal static event GreetingTextIntervalUpdatedHandler? GreetingTextIntervalUpdated;
@@ -28,6 +31,8 @@ namespace KitX_Dashboard.Models
         internal static event PluginsListChangedHandler? PluginsListChanged;
 
         internal static event DevelopSettingsChangedHandler? DevelopSettingsChanged;
+
+        internal static event LogConfigUpdatedHandler? LogConfigUpdated;
 
 
         /// <summary>
@@ -41,6 +46,7 @@ namespace KitX_Dashboard.Models
             MicaOpacityChanged += () => { };
             PluginsListChanged += () => { };
             DevelopSettingsChanged += () => { };
+            LogConfigUpdated += () => { };
         }
 
         /// <summary>
@@ -68,6 +74,9 @@ namespace KitX_Dashboard.Models
                     break;
                 case nameof(DevelopSettingsChanged):
                     DevelopSettingsChanged();
+                    break;
+                case nameof(LogConfigUpdated):
+                    LogConfigUpdated();
                     break;
             }
         }
